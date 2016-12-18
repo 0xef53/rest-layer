@@ -19,6 +19,10 @@ type asyncGet struct {
 
 func validateSelector(s []Field, v schema.Validator) error {
 	for _, f := range s {
+		// Skip this iteration if the field is a special
+		if f.Special {
+			continue
+		}
 		def := v.GetField(f.Name)
 		if def == nil {
 			return fmt.Errorf("%s: unknown field", f.Name)
@@ -73,8 +77,25 @@ func applySelector(ctx context.Context, s []Field, v schema.Validator, p map[str
 		for fn := range p {
 			s = append(s, Field{Name: fn})
 		}
+	} else {
+		snames := map[string]struct{}{}
+		for _, f := range s {
+			snames[f.Name] = struct{}{}
+		}
+		if _, ok := snames["__ALL__"]; ok {
+			for fname := range p {
+				if _, ok := snames[fname]; !ok {
+					s = append(s, Field{Name: fname})
+				}
+			}
+		}
 	}
+
 	for _, f := range s {
+		// Skip special fields
+		if f.Special {
+			continue
+		}
 		name := f.Name
 		// Handle aliasing
 		if f.Alias != "" {

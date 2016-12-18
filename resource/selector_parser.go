@@ -65,6 +65,9 @@ func parseSelectorExpression(exp []byte, pos *int, ln int, opened bool) ([]Field
 				return nil, fmt.Errorf("looking for field name at char %d", *pos)
 			}
 			field = &Field{Name: name, Alias: alias}
+			if name == "__ALL__" {
+				field.Special = true
+			}
 			expectField = false
 			continue
 		}

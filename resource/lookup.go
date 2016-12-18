@@ -37,6 +37,8 @@ type Field struct {
 	Params map[string]interface{}
 	// Fields holds references to child fields if any
 	Fields []Field
+    // Special means that the Field is a special reserved keyword
+	Special bool
 }
 
 // NewLookup creates an empty lookup object
